@@ -1,0 +1,56 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+        bind:
+            int $generatorLength: '%authorization_token.generator.length%'
+            int $defaultTtlSeconds: '%authorization_token.defaults.ttl%'
+            int $defaultMaxUsages: '%authorization_token.defaults.max_usages%'
+            array $actions: '%authorization_token.actions%'
+            string $algorithm: '%authorization_token.hashing.algorithm%'
+            Psr\EventDispatcher\EventDispatcherInterface $dispatcher: '@event_dispatcher'
+
+    # Auto-tag every constraint validator so the compiler pass can collect them.
+    _instanceof:
+        Fedale\AuthorizationTokenBundle\Contract\TokenConstraintValidatorInterface:
+            tags: ['authorization_token.constraint_validator']
+
+    # Register application/infrastructure/constraint services by convention.
+    # Pure data (domain model, value objects, events, commands, DTOs, results,
+    # the ValidationContext and the public contracts) are intentionally excluded.
+    Fedale\AuthorizationTokenBundle\:
+        resource: '../../*'
+        exclude:
+            - '../../AuthorizationTokenBundle.php'
+            - '../../Contract/'
+            - '../../DependencyInjection/'
+            - '../../Domain/'
+            - '../../Resources/'
+            - '../../Application/Command/'
+            - '../../Application/DTO/'
+            - '../../Application/Result/'
+            - '../../Constraint/ValidationContext.php'
+            # Doctrine adapter: optional, registered by services_doctrine.yaml
+            # only when DoctrineBundle is present (see AuthorizationTokenExtension).
+            - '../../Infrastructure/Doctrine/'
+
+    # The registry receives its validators from RegisterConstraintValidatorsPass;
+    # default to an empty list when no validator is registered.
+    Fedale\AuthorizationTokenBundle\Constraint\Registry\ConstraintValidatorRegistry:
+        arguments:
+            $validators: []
+
+    # Bind the public contracts to their default implementations.
+    Fedale\AuthorizationTokenBundle\Contract\TokenManagerInterface:
+        alias: Fedale\AuthorizationTokenBundle\Application\Service\TokenManager
+        public: true
+
+    Fedale\AuthorizationTokenBundle\Contract\TokenGeneratorInterface:
+        alias: Fedale\AuthorizationTokenBundle\Infrastructure\Generator\SecureTokenGenerator
+
+    Fedale\AuthorizationTokenBundle\Contract\TokenHasherInterface:
+        alias: Fedale\AuthorizationTokenBundle\Infrastructure\Hashing\Sha256TokenHasher
+
+    Psr\Clock\ClockInterface:
+        alias: Fedale\AuthorizationTokenBundle\Infrastructure\Clock\SystemClock

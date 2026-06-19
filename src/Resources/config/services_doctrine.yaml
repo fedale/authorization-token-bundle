@@ -1,0 +1,18 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Fedale\AuthorizationTokenBundle\Infrastructure\Doctrine\Mapper\AuthorizationTokenMapper: ~
+
+    Fedale\AuthorizationTokenBundle\Infrastructure\Doctrine\Repository\DoctrineTokenRepository: ~
+
+    # Bind the core repository contracts to the Doctrine implementation.
+    # An application can override either alias in its own services.yaml to plug
+    # a different storage adapter — the last definition wins.
+    Fedale\AuthorizationTokenBundle\Contract\AuthorizationTokenReadRepositoryInterface:
+        alias: Fedale\AuthorizationTokenBundle\Infrastructure\Doctrine\Repository\DoctrineTokenRepository
+
+    Fedale\AuthorizationTokenBundle\Contract\AuthorizationTokenWriteRepositoryInterface:
+        alias: Fedale\AuthorizationTokenBundle\Infrastructure\Doctrine\Repository\DoctrineTokenRepository
