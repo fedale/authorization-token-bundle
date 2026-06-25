@@ -21,8 +21,7 @@ final class ValidationContext
         public readonly ?string $ip = null,
         public readonly ?string $userAgent = null,
         public readonly array $attributes = [],
-    ) {
-    }
+    ) {}
 
     public function attribute(string $key, mixed $default = null): mixed
     {
